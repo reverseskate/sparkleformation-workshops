@@ -1,0 +1,30 @@
+## This file provides the sfn configuration. The .sfn may be JSON, YML, or Ruby. We've opted for Ruby for the greatest programmatic potential, and because the syntax mirrors that used by SparkleFormation's template files. 
+
+## Start a new configuration block.
+Configuration.new do
+  ## Access AWS Credentials via Environment variables.
+  credentials do
+    aws_access_key_id ENV['AWS_ACCESS_KEY_ID']
+    aws_secret_access_key ENV['AWS_SECRET_ACCESS_KEY']
+    aws_region ENV['AWS_REGION']
+    ## sfn requires a bucket region in order to access the correct API
+    ## endpoint for nested templates (see below). If a bucket region
+    ## is not set, we'll use the aws_region.
+    aws_bucket_region ENV['AWS_BUCKET_REGION'] || ENV['AWS_REGION']
+  end
+  ## An S3 bucket for nested templates. This bucket must already
+  ## exist.
+  nesting_bucket ENV['NESTING_BUCKET']
+  ## Enable processing of SparkleFormation templates into
+  ## Cloudformation JSON.
+  processing true
+  options do
+    ## Disabling Rollback leaves failed EC2 instances up for
+    ## debugging. 
+    disable_rollback true 
+    ## We have to explicitly include the 'CAPABILITY_IAM' capability
+    ## in order to confirm that we know CloudFormation may create IAM
+    ## resources which could enable account access.
+    capabilities ['CAPABILITY_IAM']
+  end
+end
