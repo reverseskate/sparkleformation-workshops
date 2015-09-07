@@ -1,8 +1,6 @@
-SparkleFormation.new(:coolapp_vpc).load(:base, :vpc).overrides do
+SparkleFormation.new(:hw_training_vpc).load(:base, :vpc).overrides do
 
-zones = registry!(:zones)
-
-  zones.each do |zone|
+  description 'Basic VPC for Heavy Water SparkleFormation Workshop'
   
   dynamic!(:subnet, ['public_', zone.gsub('-', '_') ].join,
            :vpc_id => ref!(:vpc),
