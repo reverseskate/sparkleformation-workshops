@@ -43,4 +43,31 @@ following:
 ```
 Name                   Created                StatusTemplate                Description
 ```
+### Provision a Basic VPC
+This repository includes a SparkleFormation template to create a basic
+VPC for training purposes. You should be able to provision this VPC
+"out-of-the-box" by issuing the following create command:
+```
+bundle exec sfn create training-vpc --file sparkleformation/vpc.rb
+```
+Sfn will prompt for a number of parameters. There should be a default
+for each parameter, indicated by brackets, which you can accept.
 
+Note that 'training-vpc' is the stack name, and you may change this to
+a name of your choosing. Stack names are restricted to alphanumeric
+characters and the '-'. They must begin with a letter.
+
+The training VPC creates the following resources:
+* A VPC in the specified region with the specified VPC subnet CIDR
+(defaults to 10.0.0.0/16).
+* An Internet Gateway to route public traffic to the Internet.
+* Public and Private Route Tables (the private route table is unused
+initially).
+* A Public Subnet in each Availability Zones available to your
+account. A registry entry queries AWS to determine the available AZs
+in this example.
+
+Upon stack completion, Sfn will print the stack outputs, which include
+the resource ids for the above provisioned resources.
+
+**You Are Now Ready for the Workshop!**
