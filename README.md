@@ -22,3 +22,25 @@ the `sfn` CLI tool:
   nested templates.
 * `AWS_BUCKET_REGION` The AWS region where you created the template
   bucket, if it is not the same as `AWS_REGION`.
+
+### Installation
+Install the required gems using Bundler by running `bundle
+install`. Post installation, you should see the following:
+```
+This is an install of the sfn gem from the 1.0 release tree. If you
+are upgrading from a pre-1.0 version, please review the CHANGELOG and
+test your environment _before_ continuing on!
+
+* https://github.com/sparkleformation/sfn/blob/master/CHANGELOG.md
+
+Happy stacking!
+```
+Following installation, you may run `bundle exec sfn list` to check your
+installation. If you have already provisioned CloudFormation stacks in
+the configured region, you should see a list of those stacks. If you
+do not have CloudFormation stacks provisioned, you should see the
+following:
+```
+Name                   Created                StatusTemplate                Description
+```
+
