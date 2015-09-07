@@ -2,7 +2,7 @@
 This repository is a starter kit for Heavy Water's
 SparkleFormation workshops. The content here provides a baseline for
 workshop participants to immediately begin provisioning with
-SparkleFormation and `sfn` to Amazon Web Services' Cloudformation.
+SparkleFormation and `sfn` to Amazon Web Services' CloudFormation.
 
 ## Requirements
 You should have a modern Ruby version installed (>= 2.0.0 should work)
