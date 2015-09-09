@@ -95,7 +95,10 @@ SparkleFormation.new(:example).load(:base).overrides do
       end
       metadata('AWS::CloudFormation::Init') do
         _camel_keys_set(:auto_disable)
-        config do
+        configSets do
+          default [ 'github_ssh_user' ]
+        end
+        github_ssh_user do
           commands('00_apt_get_update') do
             command 'sudo apt-get update'
           end
