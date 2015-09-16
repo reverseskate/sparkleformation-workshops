@@ -8,6 +8,8 @@ SparkleFormation and `sfn` to Amazon Web Services' CloudFormation.
 You should have a modern Ruby version installed (>= 2.0.0 should work)
 with Rubygems and the Bundler gem. Bundler manages the required gems.
 
+You should also bookmark or otherwise make note of the [AWS
+CloudFormation Reference Docs](http://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/template-reference.html).
 ## Instructions for Use
 
 ### Environment Variables
