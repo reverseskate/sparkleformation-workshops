@@ -8,6 +8,10 @@ SparkleFormation.new(:example).load(:base).overrides do
       description 'Github User for SSH'
     end
 
+    hello_world do
+      type 'String'
+      description 'NGINX Hello World Text'
+    end
     
     vpc_id do
       type 'String'
@@ -53,7 +57,6 @@ SparkleFormation.new(:example).load(:base).overrides do
         availability_zone 'us-west-2a'
         image_id 'ami-e5b8b4d5'
         instance_type 'm3.medium'
-        key_name 'michael-hw'
         network_interfaces array!(
           -> {
             associate_public_ip_address true
@@ -98,7 +101,7 @@ SparkleFormation.new(:example).load(:base).overrides do
       metadata('AWS::CloudFormation::Init') do
         _camel_keys_set(:auto_disable)
         configSets do
-          default [ 'github_ssh_user' ]
+          default [ 'github_ssh_user', 'nginx_hello_world' ]
         end
         github_ssh_user do
           commands('00_apt_get_update') do
@@ -115,6 +118,25 @@ SparkleFormation.new(:example).load(:base).overrides do
                     )
           end
         end 
+        nginx_hello_world do
+          packages(:apt) do
+            nginx ''
+          end
+          files('/usr/share/nginx/html/index.html') do
+            content join!(
+                          '<html>',
+                          ref!(:hello_world),
+                          '</html>'
+                          )
+          end
+          services(:sysvinit) do
+            nginx do
+              enabled true
+              ensureRunning true
+              sources ['/usr/share/nginx/html/index.html']
+            end
+          end
+        end
       end
     end
 
@@ -163,6 +185,9 @@ SparkleFormation.new(:example).load(:base).overrides do
   outputs do
     ec2_ip_address do
       value attr!(:example_ec2_instance, :public_ip)
+    end
+    ec2_dns_address do
+      value attr!(:example_ec2_instance, :public_dns_name)
     end
   end
 end
