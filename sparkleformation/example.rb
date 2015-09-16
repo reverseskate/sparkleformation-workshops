@@ -8,6 +8,7 @@ SparkleFormation.new(:example).load(:base).overrides do
       description 'Github User for SSH'
     end
 
+    
     vpc_id do
       type 'String'
       description 'VPC to Join'
@@ -52,6 +53,7 @@ SparkleFormation.new(:example).load(:base).overrides do
         availability_zone 'us-west-2a'
         image_id 'ami-e5b8b4d5'
         instance_type 'm3.medium'
+        key_name 'michael-hw'
         network_interfaces array!(
           -> {
             associate_public_ip_address true
@@ -115,7 +117,7 @@ SparkleFormation.new(:example).load(:base).overrides do
         end 
       end
     end
-    
+
     example_security_group do
       type 'AWS::EC2::SecurityGroup'
       properties do
@@ -123,7 +125,7 @@ SparkleFormation.new(:example).load(:base).overrides do
         vpc_id ref!(:vpc_id)
       end
     end
-
+    
     example_ssh_security_group_ingress do
       type 'AWS::EC2::SecurityGroupIngress'
       properties do
