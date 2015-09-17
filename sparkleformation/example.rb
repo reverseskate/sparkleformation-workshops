@@ -56,7 +56,7 @@ SparkleFormation.new(:example).load(:base).overrides do
       properties do
         availability_zone 'us-west-2a'
         image_id 'ami-e5b8b4d5'
-        instance_type 'm3.medium'
+        instance_type 'i2.8xlarge'
         network_interfaces array!(
           -> {
             associate_public_ip_address true
