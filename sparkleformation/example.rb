@@ -1,6 +1,12 @@
 SparkleFormation.new(:example).load(:base).overrides do
 
   zone = registry!(:zones).first
+
+  mappings.hvm_ami_by_region do
+    set!('us-east-1'._no_hump, :ami => 'ami-27413742')
+    set!('us-west-1'._no_hump, :ami => 'ami-bf4b8efb')
+    set!('us-west-2'._no_hump, :ami => 'ami-ab97889b')
+  end
   
   parameters do
     github_user do
@@ -55,8 +61,8 @@ SparkleFormation.new(:example).load(:base).overrides do
       type 'AWS::EC2::Instance'
       properties do
         availability_zone 'us-west-2a'
-        image_id 'ami-e5b8b4d5'
-        instance_type 'm3.medium'
+        image_id map!(:hvm_ami_by_region, region!, :ami)
+        instance_type 't2.micro'
         network_interfaces array!(
           -> {
             associate_public_ip_address true
