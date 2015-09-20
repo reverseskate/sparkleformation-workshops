@@ -60,7 +60,6 @@ SparkleFormation.new(:example).load(:base).overrides do
     example_ec2_instance do
       type 'AWS::EC2::Instance'
       properties do
-        availability_zone 'us-west-2a'
         image_id map!(:hvm_ami_by_region, region!, :ami)
         instance_type 't2.micro'
         network_interfaces array!(
