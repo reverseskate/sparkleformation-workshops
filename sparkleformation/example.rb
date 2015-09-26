@@ -1,4 +1,4 @@
-SparkleFormation.new(:example).load(:base).overrides do
+SparkleFormation.new(:example).load(:base, :compute, :in_a_vpc).overrides do
 
   zone = registry!(:zones).first
   
@@ -12,49 +12,13 @@ SparkleFormation.new(:example).load(:base).overrides do
       type 'String'
       description 'NGINX Hello World Text'
     end
-    
-    vpc_id do
-      type 'String'
-      description 'VPC to Join'
-    end
-
-    set!(['public_', zone.gsub('-','_'), '_subnet'].join) do
-      type 'String'
-      description 'Subnet to join'
-    end
   end
-  
+
   resources do
-    cfn_user do
-      type 'AWS::IAM::User'
-      properties do
-        path '/'
-        policies array!(
-          -> {
-            policy_name 'cfn_access'
-            policy_document do
-              statement array!(
-                -> {
-                  effect 'Allow'
-                  action 'cloudformation:DescribeStackResource'
-                  resource '*'
-                }
-              )
-            end                 
-          }
-        )
-      end
-    end
-    
-    cfn_keys do
-      type 'AWS::IAM::AccessKey'
-      properties.user_name ref!(:cfn_user)
-    end
-    
     example_ec2_instance do
       type 'AWS::EC2::Instance'
       properties do
-        availability_zone 'us-west-2a'
+        availability_zone zone
         image_id 'ami-e5b8b4d5'
         instance_type 'm3.medium'
         network_interfaces array!(
@@ -65,32 +29,7 @@ SparkleFormation.new(:example).load(:base).overrides do
             group_set [ ref!(:example_security_group) ]
           }                          
         )
-        user_data(
-          base64!(
-            join!(
-              "#!/bin/bash\n",
-              "apt-get update\n",
-              "apt-get -y install python-setuptools\n",
-              "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
-              '/usr/local/bin/cfn-init -v --region ',
-              region!,
-              ' -s ',
-              stack_name!,
-              " -r #{process_key!(:example_ec2_instance)} --access-key ",
-              ref!(:cfn_keys),
-              ' --secret-key ',
-              attr!(:cfn_keys, :secret_access_key),
-              "\n",
-              "cfn-signal -e $? --region ",
-              region!,
-              ' --stack ',
-              stack_name!,
-              ' --resource ',
-              process_key!(:example_ec2_instance),
-              "\n"
-            )
-          )
-        )
+        registry!(:init_and_signal_user_data, :example, :init_resource => :example_ec2_instance, :notify_resource => :example_ec2_instance)
       end
       creation_policy do
         resource_signal do
@@ -101,86 +40,32 @@ SparkleFormation.new(:example).load(:base).overrides do
       metadata('AWS::CloudFormation::Init') do
         _camel_keys_set(:auto_disable)
         configSets do
-          default [ 'github_ssh_user', 'nginx_hello_world' ]
-        end
-        github_ssh_user do
-          commands('00_apt_get_update') do
-            command 'sudo apt-get update'
-          end
-          commands('01_install_curl') do
-            command 'sudo apt-get install curl -y'
-          end
-          commands('02_set_ssh_keys') do
-            command join!(
-                      'sudo mkdir -p /home/ubuntu/.ssh && sudo curl https://github.com/',
-                      ref!(:github_user),
-                      '.keys >> /home/ubuntu/.ssh/authorized_keys'
-                    )
-          end
-        end 
-        nginx_hello_world do
-          packages(:apt) do
-            nginx ''
-          end
-          files('/usr/share/nginx/html/index.html') do
-            content join!(
-                          '<html>',
-                          ref!(:hello_world),
-                          '</html>'
-                          )
-          end
-          services(:sysvinit) do
-            nginx do
-              enabled true
-              ensureRunning true
-              sources ['/usr/share/nginx/html/index.html']
-            end
-          end
+          default [ ]
         end
       end
-    end
-
-    example_security_group do
-      type 'AWS::EC2::SecurityGroup'
-      properties do
-        group_description "Security Group for Example"
-        vpc_id ref!(:vpc_id)
-      end
-    end
-    
-    example_ssh_security_group_ingress do
-      type 'AWS::EC2::SecurityGroupIngress'
-      properties do
-        group_id ref!(:example_security_group)
-        ip_protocol 'tcp'
-        from_port 22
-        to_port 22
-        cidr_ip '0.0.0.0/0'
-      end
-    end
-
-    example_http_security_group_ingress do
-      type 'AWS::EC2::SecurityGroupIngress'
-      properties do
-        group_id ref!(:example_security_group)
-        ip_protocol 'tcp'
-        from_port 80
-        to_port 80
-        cidr_ip '0.0.0.0/0'
-      end
-    end
-
-    example_all_security_group_egress do
-      type 'AWS::EC2::SecurityGroupEgress'
-      properties do
-        group_id ref!(:example_security_group)
-        ip_protocol '-1'
-        from_port 1
-        to_port 65535
-        cidr_ip '0.0.0.0/0'
-      end
+      registry!(:github_ssh_user)
+      registry!(:nginx_hello_world)
     end
   end
+
+  dynamic!(:security_group_with_rules, :example,
+           :ingress => {
+             :ssh => {
+               :protocol => 'tcp',
+               :ports => 22
+             },
+             :http => {
+               :protocol => 'tcp',
+               :ports => 80
+             }
+           },
+           :egress => {
+             :all => {
+               :protocol => '-1',
+               :ports => [1, 65535]
+             }
+           }
+           )
 
   outputs do
     ec2_ip_address do
