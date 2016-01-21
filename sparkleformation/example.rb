@@ -3,9 +3,9 @@ SparkleFormation.new(:example).load(:base).overrides do
   zone = registry!(:zones).first
 
   mappings.hvm_ami_by_region do
-    set!('us-east-1'._no_hump, :ami => 'ami-27413742')
-    set!('us-west-1'._no_hump, :ami => 'ami-bf4b8efb')
-    set!('us-west-2'._no_hump, :ami => 'ami-ab97889b')
+    set!('us-east-1'._no_hump, :ami => 'ami-0f8bce65')
+    set!('us-west-1'._no_hump, :ami => 'ami-f898f698')
+    set!('us-west-2'._no_hump, :ami => 'ami-534d5d32')
   end
   
   parameters do
